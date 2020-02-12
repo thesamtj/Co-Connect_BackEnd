@@ -50,6 +50,19 @@ app.post('/scream', (req, res) => {
     });
 });
 
+const isEmail = (email) => {
+  const regEx = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  return (email.match(regEx)) 
+    ? true
+    : false
+}
+
+const isEmpty = (string) => {
+  return (string.trim() == '') 
+    ?  true
+    : false
+}
+
 // sign up route
 app.post('/signup', (req, res) => {
  
@@ -60,7 +73,22 @@ app.post('/signup', (req, res) => {
     handle: req.body.handle
   };    
 
-  // TODO validate data
+  // Validate data
+  let errors = {};
+
+  
+  if (isEmpty(newUser.email)) {
+    errors.email = 'Email must not be empty';
+  } else if (!isEmail(newUser.email)) {
+    errors.email = 'Must be a valid email address'
+  }
+
+  if (isEmpty(newUser.password)) errors.password = 'Must not be empty'
+  if (isEmpty(newUser.password !== newUser.confirmPassword)) errors.confirmPassword = 'Password must match'
+  if (isEmpty(newUser.handle)) errors.handle = 'Must not be empty'
+
+  if (Object.keys(errors).length > 0) return res.status(400).json(errors);
+
   let token, userId;
   db.doc(`/users/${newUser.handle}`).get().then(doc => {
     if (doc.exists) {
@@ -94,6 +122,42 @@ app.post('/signup', (req, res) => {
     }
        
   });
+
+  // login route
+app.post('/login', (req, res) => {
+ 
+  const user = {
+    email: req.body.email,
+    password: req.body.password
+  };    
+
+  // Validate data
+  let errors = {};
+
+  
+  if (isEmpty(user.email)) errors.handle = 'Must not be empty'
+  if (isEmpty(user.password)) errors.password = 'Must not be empty'
+  
+  if (Object.keys(errors).length > 0) return res.status(400).json(errors);
+
+ firebase
+    .auth()
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then(data => {
+      return res.data.user.getIdToken();
+    }).then((idToken) => {
+      return res.json({ token });
+    })
+    .catch(err => {
+      console.error(err);
+      if (err.code === 'auth/wrong-password') {
+        return res.status(403).json({ general: 'Wrong credentials, please try again' });
+      } else {
+        return res.status(500).json({ error: error.code });
+      }
+    });
+});
+
 
   
 // https://baseurls.com/api/
