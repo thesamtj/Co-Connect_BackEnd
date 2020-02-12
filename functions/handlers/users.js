@@ -17,7 +17,7 @@ exports.signup = (req, res) => {
   
     const { valid, errors } = validateSignupData(newUser);
     if (!valid) {
-        return res.status.(400).json(errors);
+        return res.status(400).json(errors);
     }
 
     let token, userId;
@@ -42,7 +42,7 @@ exports.signup = (req, res) => {
       };    
       return db.doc(`/users/${newUser.handle}`).set(userCredentials);
     }).then(() => {
-      return res.status.(201).json({ token });
+      return res.status(201).json({ token });
     })
     .catch(err => {
       console.error(err);
@@ -64,7 +64,7 @@ exports.login = (req, res) => {
     
     const { valid, errors } = validateLoginData(user);
     if (!valid) {
-        return res.status.(400).json(errors);
+        return res.status(400).json(errors);
     }
 
    
