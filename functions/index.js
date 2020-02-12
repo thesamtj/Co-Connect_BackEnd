@@ -10,6 +10,7 @@ const config = {}
 const firebase = require('firebase');
 firebase.initializeApp(config);
 
+// Get screams
 app.get('/screams', (req, res) => {
   db
     .collection("screams")
@@ -30,11 +31,40 @@ app.get('/screams', (req, res) => {
     .catch(err => console.error(err));
 });
 
-app.post('/scream', (req, res) => {
+const FBAuth = (req, res, next) => {
+  let idToken;
+  if (req.authorization.headers && req.authorization.headers.startsWith('Bearer ')){
+    idToken = req.authorization.headers.split('Bearer ')[1];
+  } else {
+    console.error('No token found');
+    return res.status(403).json({ error: 'Unauthorized'});
+  }
+
+  admin.auth().verifyIdToken(idToken)
+    .then(decodedToken => {
+      req.user = decodedToken;
+      console.log(decodedToken);
+      return db.collection('users')
+        .where('userId', '==', req.user.uid)
+        .limit(1)
+        .get();
+    })
+    .then(data => {
+      req.user.handle = data.docs[0].data().handle;
+      return next();
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(403).json('Error while verifying token', err);      
+    });
+}
+
+// Post one scream
+app.post('/scream', FBAuth, (req, res) => {
  
   const newScream = {
     body: req.body.body,
-    userHandle: req.body.userHandle,
+    userHandle: req.user.handle,
     createdAt: new Date().toISOString()
   };
 
@@ -50,6 +80,7 @@ app.post('/scream', (req, res) => {
     });
 });
 
+// helper functions
 const isEmail = (email) => {
   const regEx = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   return (email.match(regEx)) 
