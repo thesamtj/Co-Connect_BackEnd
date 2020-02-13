@@ -38,4 +38,28 @@ exports.getAllScreams = (req, res) => {
         res.status(500).json({ error: "something went wrong" });
         console.error(err);
       });
+  } 
+
+  exports.getScream = (req, res) => {
+    let screamData = {};
+    db.doc(`/screams/${req.params.screamId}`).get()
+      .then(doc => {
+        if (!doc.exists) {
+          res.status(400).json({ error: "Scream not found" });
+        }
+        screamData = doc.data();
+        screamData.screamId = doc.id;
+        return db.collection('comments').orderBy('createdAt', 'desc').where('screamId', '==', req.params.screamId).get()
+      })
+      .then(data => {
+        screamData.comments = [];
+        data.forEach(doc => {
+          screamData.comments.push(doc.data())
+        });
+        return res.json(screamData);
+      })
+      .catch(err => {
+        res.status(500).json({ error: err.code });
+        console.error(err);
+      });
   }
