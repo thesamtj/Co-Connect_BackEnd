@@ -25,8 +25,7 @@ let db = {
             userHandle: 'user',
             screamId: 'KDKJJ33849ejafnkIHn',
             createdAt: '2020-02-15T11:46:01.018Z',
-            body: 'this is the scream body',
-            createdAt: '2020-02-15T11:46:01.018Z'
+            body: 'this is the scream body'
         }
     ]
 };

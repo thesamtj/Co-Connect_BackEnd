@@ -4,7 +4,8 @@ const FBAuth = require("./util/fbAuth");
 const { 
   getAllScreams, 
   postOneScream, 
-  getScream 
+  getScream,
+  commentOnScream
 } = require("./handlers/screams");
 const { 
   signup, 
@@ -19,6 +20,7 @@ const {
 app.get("/screams", getAllScreams);
 app.post("/scream", FBAuth, postOneScream);
 app.get("/scream/:screamId", getScream);
+app.post("/scream/:screamId", commentOnScream);
 
 
 // Users routes
