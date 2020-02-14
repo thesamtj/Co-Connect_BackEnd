@@ -27,6 +27,16 @@ let db = {
             createdAt: '2020-02-15T11:46:01.018Z',
             body: 'this is the scream body'
         }
+    ],
+    notifications: [
+        {
+            recipient: 'user',
+            sender: 'john',
+            read: 'true | false',
+            screamId: 'KDKJJ33849ejafnkIHn',
+            type: 'like | comment',
+            createdAt: '2020-02-15T11:46:01.018Z'
+        }
     ]
 };
 

@@ -118,6 +118,21 @@ exports.getUserDetails = (req, res) => {
       data.forEach(doc => {
         userData.likes.push(doc.data());
       })
+      return db.collection('notifications').where('recipient', '==', req.user.handle).orderBy('createdAt', 'desc').limit(10).get();
+    })
+    .then(data => {
+      userData.notifications = [];
+      data.forEach(doc => {
+        userData.notifications.push({
+          recipient: doc.data().recipient,
+          sender: snapshot.data().sender,
+          read: doc.data().read,
+          screamId: doc.data().screamId,
+          type: doc.data().type,
+          createdAt: new Date().createdAt,
+          notificationId: doc.id
+        });
+      });
       return res.json(userData);
     })
     .catch(err => {
