@@ -15,8 +15,10 @@ const {
   signup, 
   login, 
   uploadImage, 
-  addUserDetails, 
-  getUserDetails 
+  addUserDetails,
+  getAuthenticatedDetails, 
+  getUserDetails,
+  markNotificationsRead 
 } = require("./handlers/users");
 
 
@@ -35,7 +37,9 @@ app.post("/signup", signup);
 app.post("/login", login);
 app.post("/user/image", FBAuth, uploadImage);
 app.post("/user", FBAuth, addUserDetails);
-app.get("/user", FBAuth, getUserDetails);
+app.get("/user", FBAuth, getAuthenticatedDetails);
+app.get("/user/:handle", getUserDetails);
+app.post("/notifications", FBAuth, markNotificationsRead);
 
 
 // https://baseurls.com/api/

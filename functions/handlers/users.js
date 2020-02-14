@@ -103,14 +103,47 @@ exports.addUserDetails = (req, res) => {
       });
 };
 
-// Get own user details
+// Get any user details
 exports.getUserDetails = (req, res) => {
+  let userData = {};
+  db.doc(`/users/${req.params.handle}`).get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.user = doc.data();
+        return db.collection('screams').where('userHandle', '==', req.params.handle).get();
+      } else {
+        return res.status(400).json({ error: 'User not found' });
+      }
+    })
+    .then(data => {
+      userData.screams = [];
+      data.forEach(doc => {
+        userData.likes.push({
+          body: doc.data().body,
+          userHandle: snapshot.data().userHandle,
+          userImage: doc.data().userImage,
+          screamId: doc.screamId,
+          LikeCount: doc.data().LikeCount,
+          createdAt: new Date().createdAt,
+          commentCount: doc.data().commentCount
+        });
+      });
+      return res.json(userData);
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({ error: error.code });
+      });
+};
+
+// Get own user details
+exports.getAuthenticatedDetails = (req, res) => {
   let userData = {};
   db.doc(`/users/${req.user.handle}`).get()
     .then(doc => {
       if (doc.exists) {
         userData.userCredentials = doc.data();
-        return db.collection('likes').where('userHandle', '==', req.user.handle).get()
+        return db.collection('likes').where('userHandle', '==', req.user.handle).get();
       }
     })
     .then(data => {
@@ -139,7 +172,7 @@ exports.getUserDetails = (req, res) => {
       console.error(err);
       return res.status(500).json({ error: error.code });
       });
-}
+};
 
 // Upload a profile image
 exports.uploadImage = (req, res) => {
@@ -186,3 +219,21 @@ exports.uploadImage = (req, res) => {
   });
   busboy.end(req.rawBody);
 };
+
+// Mark notification read
+exports.markNotificationsRead = (req, res) => {
+  let batch = db.batch();
+  req.body.forEach((notificationId) => {
+    const notification = db.doc(`/notifications/${notificationId}`);
+    batch.update(notification, { read: true });
+  });
+  batch
+    .commit()
+    .then(() => {
+      return res.json({ message: 'Notifications marked read'});
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: error.code });
+    });
+}
