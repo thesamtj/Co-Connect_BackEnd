@@ -48,9 +48,9 @@ exports.api = functions.region("europe-west1").https.onRequest(app);
 // notifications
 exports.createNotificationOnLike = function.region('europe-west1').firestore.document('likes/{id}')
   .onCreate((snapshot) => {
-    db.doc(`/screams/${snapshot.data().screamId}`).get()
+    return db.doc(`/screams/${snapshot.data().screamId}`).get()
       .then(doc => {
-        if (doc.exists) {
+        if (doc.exists && doc.data().userHandle !== snapshot.data().userHandle) {
           return db.doc(`/notifications/`${snapshot.id}).set({
             recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
@@ -61,24 +61,15 @@ exports.createNotificationOnLike = function.region('europe-west1').firestore.doc
           });
         }
       })
-      .then(() => {
-        return;
-      })
       .catch(err => {
         console.error(err);
-        return;
       })
   });
 
   exports.deleteNotificationOnUnLike = function.region('europe-west1').firestore.document('comments/{id}')
   .onDelete((snapshot) => {
-    db.doc(`/notifications/${snapshot.Id}`).delete()
-      .then(() => {
-        if (doc.exists) {
-          return;
-        }
-      })
-      .catch(err => {
+    return db.doc(`/notifications/${snapshot.Id}`).delete()
+     .catch(err => {
         console.error(err);
         return;
       })
@@ -86,9 +77,9 @@ exports.createNotificationOnLike = function.region('europe-west1').firestore.doc
   
   exports.createNotificationOnComment = function.region('europe-west1').firestore.document('comments/{id}')
   .onCreate((snapshot) => {
-    db.doc(`/screams/${snapshot.data().screamId}`).get()
+    return db.doc(`/screams/${snapshot.data().screamId}`).get()
       .then(doc => {
-        if (doc.exists) {
+        if (doc.exists && doc.data().userHandle !== snapshot.data().userHandle) {
           return db.doc(`/notifications/`${snapshot.id}).set({
             recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
@@ -99,11 +90,56 @@ exports.createNotificationOnLike = function.region('europe-west1').firestore.doc
           });
         }
       })
-      .then(() => {
-        return;
-      })
       .catch(err => {
         console.error(err);
         return;
       })
   });
+
+  exports.onUserImageChange = function.region('europe-west1').firestore.document('comments/{id}')
+  .onUpdate((change) => {
+    console.log(change.before.data());
+    console.log(change.after.data());
+    
+    if (change.before.data().imageUrl !== change.after.data().imageUrl) {
+      console.log('Image has changed');
+      const batch = db.batch();
+      return db.collection('screams').where('userHandle', '==', change.before.data().handle).get()
+      .then((data) => {
+        data.forEach(doc => {
+          const scream = db.doc(`scream/${doc.id}`);
+          batch.update(scream, { userImage: change.after.data().imageUrl});
+        })
+        return batch.commit();
+      })
+    }
+  });
+
+  exports.onScreamDelete = function.region('europe-west1').firestore.document('screams/{screamsId}')
+  .onDelete((snapshot, context) => {
+    
+   const screamId = context.params.screamId;
+   const batch = db.batch();
+      return db.collection('comments').where('screamId', '==', screamId).get()
+      .then((data) => {
+        data.forEach(doc => {
+         batch.delete(db.doc(`/comments/${doc.id}`));
+        })
+        return db.collection('likes').where('screamId', '==', screamId);
+      })
+      .then((data) => {
+        data.forEach(doc => {
+         batch.delete(db.doc(`/likes/${doc.id}`));
+        })
+        return db.collection('notification').where('screamId', '==', screamId);
+      })
+      .then((data) => {
+        data.forEach(doc => {
+         batch.delete(db.doc(`/notification/${doc.id}`));
+        })
+        return batch.commit();
+      })
+      .catch(err => {
+        console.error(err);
+      })
+  })
