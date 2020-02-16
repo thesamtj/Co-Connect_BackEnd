@@ -20,7 +20,7 @@ exports.signup = (req, res) => {
         return res.status(400).json(errors);
     }
 
-    const noImg = 'no-img.png';
+    const noImg = 'no-img.jpg';
 
     let token, userId;
     db.doc(`/users/${newUser.handle}`).get().then(doc => {

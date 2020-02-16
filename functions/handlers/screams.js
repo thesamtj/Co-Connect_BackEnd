@@ -105,7 +105,7 @@ exports.getAllScreams = (req, res) => {
 
  // like a scream 
  exports.likeScream = (req, res) => {
-   const likeDocument = db.collection('likes').where.('userHandle', '==', req.user.handle)
+   const likeDocument = db.collection('likes').where('userHandle', '==', req.user.handle)
    .where('screamId', '==', req.params.screamId).limit(1);
 
    const screamDocument = db.doc(`screams/${req.params.screamId}`);
@@ -138,7 +138,7 @@ exports.getAllScreams = (req, res) => {
       } else {
         return res.status(400).json({ error: 'Scream already liked'});
       }
-    })v 
+    }) 
     .catch(err => {
       res.status(500).json({ error: error.code });
       console.error(err);
@@ -147,7 +147,7 @@ exports.getAllScreams = (req, res) => {
 
  // unlike a scream 
  exports.unlikeScream = (req, res) => {
-  const likeDocument = db.collection('likes').where.('userHandle', '==', req.user.handle)
+  const likeDocument = db.collection('likes').where('userHandle', '==', req.user.handle)
   .where('screamId', '==', req.params.screamId).limit(1);
 
   const screamDocument = db.doc(`screams/${req.params.screamId}`);
