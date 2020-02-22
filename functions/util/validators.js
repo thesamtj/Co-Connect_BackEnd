@@ -4,22 +4,23 @@ const isEmail = email => {
   return email.match(regEx) ? true : false;
 };
 
-const isEmpty = string => {
-  return string.trim() == "" ? true : false;
+const isEmpty = (string) => {
+  if (string.trim() === '') return true;
+  else return false;
 };
 
-exports.validateSignupData = data => {
+exports.validateSignupData = (data) => {
   // Validate data
   let errors = {};
 
   if (isEmpty(data.email)) {
     errors.email = "Email must not be empty";
-  } else if (!isEmail(newUser.email)) {
+  } else if (!isEmail(data.email)) {
     errors.email = "Must be a valid email address";
   }
 
   if (isEmpty(data.password)) errors.password = "Must not be empty";
-  if (isEmpty(data.password !== data.confirmPassword))
+  if (data.password !== data.confirmPassword)
     errors.confirmPassword = "Password must match";
   if (isEmpty(data.handle)) errors.handle = "Must not be empty";
 
@@ -29,7 +30,7 @@ exports.validateSignupData = data => {
   };
 };
 
-exports.validateLoginData = data => {
+exports.validateLoginData = (data) => {
   // Validate data
   let errors = {};
 

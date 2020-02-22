@@ -33,7 +33,7 @@ exports.signup = (req, res) => {
       }
     }).then(data => {
       userId = data.user.uid;
-      return res.data.user.getIdToken();
+      return data.user.getIdToken();
     }).then((idToken) => {
       token = idToken;
       const userCredentials = {
@@ -76,9 +76,9 @@ exports.login = (req, res) => {
         .auth()
         .signInWithEmailAndPassword(user.email, user.password)
         .then((data) => {
-        return res.data.user.getIdToken();
+        return data.user.getIdToken();
         }).then((idToken) => {
-        return res.json({ token });
+        return res.json({ idToken });
         })
         .catch(err => {
         console.error(err);
