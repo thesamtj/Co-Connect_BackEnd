@@ -98,7 +98,7 @@ exports.addUserDetails = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      return res.status(500).json({ error: error.code });
+      return res.status(500).json({ error: err.code });
       });
 };
 
@@ -131,7 +131,7 @@ exports.getUserDetails = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      return res.status(500).json({ error: error.code });
+      return res.status(500).json({ error: err.code });
       });
 };
 
@@ -169,7 +169,7 @@ exports.getAuthenticatedDetails = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      return res.status(500).json({ error: error.code });
+      return res.status(500).json({ error: err.code });
       });
 };
 
@@ -192,7 +192,7 @@ exports.uploadImage = (req, res) => {
     
     // my.image.png
     const imageExtension = filename.split('.')[filename.split('.').length - 1];
-    imageFileName = `${Math.round(Math.random()*1000000000)}.${imageExtension}`;
+    imageFileName = `${Math.round(Math.random()*1000000000).toString()}.${imageExtension}`;
     const filepath = path.join(os.tmpdir(), imageFileName);
     imageToBeUploaded = { filepath, mimetype };
     file.pipe(fs.createWriteStream(filepath));
@@ -213,7 +213,7 @@ exports.uploadImage = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: error.code });
+      return res.status(500).json({ error: err.code });
     });
   });
   busboy.end(req.rawBody);
@@ -233,6 +233,6 @@ exports.markNotificationsRead = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: error.code });
+      return res.status(500).json({ error: err.code });
     });
 }

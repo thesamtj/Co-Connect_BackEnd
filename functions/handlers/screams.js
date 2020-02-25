@@ -143,7 +143,7 @@ exports.getAllScreams = (req, res) => {
       }
     }) 
     .catch(err => {
-      res.status(500).json({ error: error.code });
+      res.status(500).json({ error: err.code });
       console.error(err);
     });
  };
@@ -182,7 +182,7 @@ exports.getAllScreams = (req, res) => {
      }
    })
    .catch(err => {
-     res.status(500).json({ error: error.code });
+     res.status(500).json({ error: err.code });
      console.error(err);
    });
 };
@@ -205,7 +205,7 @@ exports.deleteScream = (req, res) => {
       res.json({ message: 'Scream deleted successfully' });
     })
     .catch(err => {
-      res.status(500).json({ error: error.code });
+      res.status(500).json({ error: err.code });
       console.error(err);
     });
 }
