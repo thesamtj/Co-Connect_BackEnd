@@ -111,7 +111,7 @@ exports.getAllScreams = (req, res) => {
    const likeDocument = db.collection('likes').where('userHandle', '==', req.user.handle)
    .where('screamId', '==', req.params.screamId).limit(1);
 
-   const screamDocument = db.doc(`screams/${req.params.screamId}`);
+   const screamDocument = db.doc(`/screams/${req.params.screamId}`);
 
   let screamData;
 
@@ -122,7 +122,7 @@ exports.getAllScreams = (req, res) => {
         screamData.screamId = doc.id;
         return likeDocument.get();
       } else {
-        return res.status(400).json({ error: 'Scream not found'});
+        return res.status(404).json({ error: 'Scream not found'});
       }
     })
     .then(data => {
@@ -153,7 +153,7 @@ exports.getAllScreams = (req, res) => {
   const likeDocument = db.collection('likes').where('userHandle', '==', req.user.handle)
   .where('screamId', '==', req.params.screamId).limit(1);
 
-  const screamDocument = db.doc(`screams/${req.params.screamId}`);
+  const screamDocument = db.doc(`/screams/${req.params.screamId}`);
 
  let screamData;
 
@@ -164,14 +164,14 @@ exports.getAllScreams = (req, res) => {
        screamData.screamId = doc.id;
        return likeDocument.get();
      } else {
-       return res.status(400).json({ error: 'Scream not found'});
+       return res.status(404).json({ error: 'Scream not found'});
      }
    })
    .then(data => {
      if (data.empty) {
       return res.status(400).json({ error: 'Scream not liked'});
      } else {
-       return db.doc(`/likes/${data.id}`).delete()
+       return db.doc(`/likes/${data.docs[0].id}`).delete()
        .then(() => {
          screamData.likeCount--;
          return screamDocument.update({ likeCount: screamData.likeCount });
@@ -189,7 +189,7 @@ exports.getAllScreams = (req, res) => {
 
 // delete screams
 exports.deleteScream = (req, res) => {
-  const document = db.doc(`screams/${req.params.screamId}`);
+  const document = db.doc(`/screams/${req.params.screamId}`);
   document.get()
     .then(doc => {
       if (!doc.exists) {
