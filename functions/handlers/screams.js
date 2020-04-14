@@ -56,7 +56,7 @@ exports.getAllScreams = (req, res) => {
     db.doc(`/screams/${req.params.screamId}`).get()
       .then(doc => {
         if (!doc.exists) {
-          res.status(400).json({ error: "Scream not found" });
+          return res.status(404).json({ error: "Scream not found" });
         }
         screamData = doc.data();
         screamData.screamId = doc.id;
